@@ -118,8 +118,14 @@ HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), 256bit-secr
 
 `header.payload.signature`
 
-$\color{#fb015b}{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9}$**.**
-$\color{#d63aff}{eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ}$**.**
+$\color{#fb015b}{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9}$
+
+**.**
+
+$\color{#d63aff}{eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ}$
+
+**.**
+
 $\color{#00b9f1}{SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c}$
 
 raw:
