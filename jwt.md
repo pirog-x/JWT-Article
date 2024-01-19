@@ -78,20 +78,54 @@ JWT состоит из 3 частей - header, payload и signature.
 }
 ```
 
-## Подпись и проверка JWT
-Для подписи мы будет использовать стандарт [JWS](https://datatracker.ietf.org/doc/html/rfc7515) (Json Web Signature), это
-значит, что я буду подписывать токен сигнатурой (signature, и что header и payload не будут зашифрованные, а просто
-декодированы по таблице base64. Алгоритм шифрования будет `HS256(Symmetric) → HMAC using SHA256`.
+### Signature
+> Подпись(Signature) - это способ подтвердить, что JWT токен валидный.
 
+Для подписи можно использовать криптографические алгоритмы, которые определенны в стандарте 
+[JWA](https://datatracker.ietf.org/doc/html/rfc7518) (Json Web Algorithm)
+
+| "alg" Param Value  | Digital Signature or MAC Algorithm             | Implementation Requirements |
+|--------------------|------------------------------------------------|-----------------------------|
+| HS256              | HMAC using SHA-256                             | Required                    |
+| HS384              | HMAC using SHA-384                             | Optional                    |
+| HS512              | HMAC using SHA-512                             | Optional                    |
+| RS256              | RSASSA-PKCS1-v1_5 using SHA-256                | Recommended                 |
+| RS384              | RSASSA-PKCS1-v1_5 using SHA-384                | Optional                    |
+| RS512              | RSASSA-PKCS1-v1_5 using SHA-512                | Optional                    |
+| ES256              | ECDSA using P-256 and SHA-256                  | Recommended                 |
+| ES384              | ECDSA using P-384 and SHA-384                  | Optional                    |
+| ES512              | ECDSA using P-521 and SHA-512                  | Optional                    |
+| PS256              | RSASSA-PSS using SHA-256 and MGF1 with SHA-256 | Optional                    |
+| PS384              | RSASSA-PSS using SHA-384 and MGF1 with SHA-384 | Optional                    |
+| PS512              | RSASSA-PSS using SHA-512 and MGF1 with SHA-512 | Optional                    |
+| none               | No digital signature or MAC performed          | Optional                    |
+
+В сегодняшнем примере, мы будем использовать HS256. В формуле ниже можно увидеть каким образом создаётся подпись.
 ```
 HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), 256bit-secret)
 ```
+Давайте расмотрим по этапам:
+1. `base64UrlEncode(header) + "." + base64UrlEncode(payload)` - кодируем header и payload по base64 и полученные 
+значения соединяем через точку.
 
-Полученый результат мы тоже кодирует по base64. И соидиняем всё чере точку, вот результат:
+    base64 - это таблица кодировки, по этой таблице мы можем преобразовать байты в символы.
+2. `256bit-secret` - это наш секретный ключ, он нужен для того, чтобы зашифровать текст(из пункта `1`).
+3. `HMACSHA256(...)` - это уже сама функция, которая шифрует текст из пункта `1` с помощью ключа из пункта `2`
+    используя алгоритм `HS256`.
+
+То, что вернула функция и есть подпись. Для подписания токена нам нужно закодировать результат функции 
+в формате base64 и добавить его в конец токена
 
 `header.payload.signature`
 
-<font color="#fb015b">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</font>.<font color="#d63aff">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ</font>.<font color="#00b9f1">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</font>
+$\color{#fb015b}{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9}$**.**
+$\color{#d63aff}{eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ}$**.**
+$\color{#00b9f1}{SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c}$
+
+raw:
+`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9`.`eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ`.`SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+
+Именно в таком виде JWT передаётся по сети.
 
 
 ### Как проверить подленность JWT
